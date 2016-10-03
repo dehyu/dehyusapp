@@ -1,17 +1,20 @@
 from flask import Flask, render_template, request, session, redirect, url_for
-from models import db, User, Place
-from forms import SignupForm, LoginForm, AddressForm
+from models import db, User
+from forms import SignupForm
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://localhost/dehyusapp'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/dehyusapp'
 db.init_app(app)
 
 app.secret_key = "development-key"
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def index():
   return render_template("index.html")
+  resp = twilio.twiml.Response()
+  resp.message("Hello, Mobile Monkey")
+  return str(resp)
 
 @app.route("/about")
 def about():
@@ -19,7 +22,7 @@ def about():
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
-  if 'email' in session:
+  if 'phonenumber' in session:
     return redirect(url_for('home'))
 
   form = SignupForm()
@@ -28,19 +31,18 @@ def signup():
     if form.validate() == False:
       return render_template('signup.html', form=form)
     else:
-      newuser = User(form.first_name.data, form.phonenumber.data, form.email.data, form.password.data)
-      db.session.add(newuser)
-      db.session.commit()
+      resp = twilio.twiml.Response()
+      resp.message("Hello, Mobile Monkey")
+      return str(resp)
 
-      session['email'] = newuser.email
-      return redirect(url_for('home'))
+  return 'Success'
 
-  elif request.method == "GET":
-    return render_template('signup.html', form=form)
+
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-  if 'email' in session:
+  if 'phonenumber' in session:
     return redirect(url_for('home'))
 
   form = LoginForm()
@@ -49,12 +51,12 @@ def login():
     if form.validate() == False:
       return render_template("login.html", form=form)
     else:
-      email = form.email.data 
+      phonenumber = form.phonenumber.data 
       password = form.password.data 
 
-      user = User.query.filter_by(email=email).first()
+      user = User.query.filter_by(phonenumber=phonenumber).first()
       if user is not None and user.check_password(password):
-        session['email'] = form.email.data 
+        session['phonenumber'] = form.phonenumber.data 
         return redirect(url_for('home'))
       else:
         return redirect(url_for('login'))
@@ -64,36 +66,8 @@ def login():
 
 @app.route("/logout")
 def logout():
-  session.pop('email', None)
+  session.pop('phonenumber', None)
   return redirect(url_for('index'))
-
-@app.route("/home", methods=["GET", "POST"])
-def home():
-  if 'email' not in session:
-    return redirect(url_for('login'))
-
-  form = AddressForm()
-
-  places = []
-  my_coordinates = (37.4221, -122.0844)
-
-  if request.method == 'POST':
-    if form.validate() == False:
-      return render_template('home.html', form=form)
-    else:
-      # get the address
-      address = form.address.data 
-
-      # query for places around it
-      p = Place()
-      my_coordinates = p.address_to_latlng(address)
-      places = p.query(address)
-
-      # return those results
-      return render_template('home.html', form=form, my_coordinates=my_coordinates, places=places)
-
-  elif request.method == 'GET':
-    return render_template("home.html", form=form, my_coordinates=my_coordinates, places=places)
 
 if __name__ == "__main__":
   app.run(debug=True)

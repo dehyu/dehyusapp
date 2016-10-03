@@ -20,7 +20,7 @@
           {{ form.first_name }}
         </div>
 
-           <div class="form-group">
+        <div class="form-group">
           {{ form.phonenumber.label }}
 
           {% if form.phonenumber.errors %}
@@ -30,31 +30,6 @@
           {% endif %}
 
           {{ form.phonenumber }}
-        </div>
-
-       
-        <div class="form-group">
-          {{ form.email.label }}
-
-          {% if form.email.errors %}
-            {% for error in form.email.errors %}
-              <p class="error-message">{{ error }}</p>
-            {% endfor %}
-          {% endif %}
-
-          {{ form.email }}
-        </div>
-
-        <div class="form-group">
-          {{ form.password.label }}
-
-          {% if form.password.errors %}
-            {% for error in form.password.errors %}
-              <p class="error-message">{{ error }}</p>
-            {% endfor %}
-          {% endif %}
-
-          {{ form.password }}
         </div>
 
         {{ form.submit(class="btn-primary") }}
