@@ -10,14 +10,12 @@ db.init_app(app)
 
 app.secret_key = "development-key"
 
-callers = {
-    "+13013185581": "Curious George",
-    "+14158675310": "Boots",
-    "+14158675311": "Virgil",
-}
 @app.route("/", methods=['GET', 'POST'])
 def index():
- return render_template("index.html")
+  return render_template("index.html")
+  resp = twilio.twiml.Response()
+  resp.message("Hello, Mobile Monkey")
+  return str(resp)
 
 @app.route("/about")
 def about():
