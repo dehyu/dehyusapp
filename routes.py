@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from models import db, User
 from forms import SignupForm
+from twilio.rest import TwilioRestClient
 
 app = Flask(__name__)
 
@@ -9,12 +10,25 @@ db.init_app(app)
 
 app.secret_key = "development-key"
 
+callers = {
+    "+13013185581": "Curious George",
+    "+14158675310": "Boots",
+    "+14158675311": "Virgil",
+}
 @app.route("/", methods=['GET', 'POST'])
 def index():
-  return render_template("index.html")
-  resp = twilio.twiml.Response()
-  resp.message("Hello, Mobile Monkey")
-  return str(resp)
+ return render_template("index.html")
+ from_number = request.values.get('From', None)
+ if from_number in callers:
+  message = callers[from_number] + ", thanks for the message!"
+ else:
+  message = "Monkey, thanks for the message!"
+
+
+ resp = twilio.twiml.Response()
+ resp.message(message)
+
+ return str(resp)
 
 @app.route("/about")
 def about():
@@ -22,52 +36,17 @@ def about():
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
-  if 'phonenumber' in session:
-    return redirect(url_for('home'))
+  ACCOUNT_SID = "AC51aa42874175a8f9a1f7b95f3a3a5fe6"
+  AUTH_TOKEN = "b7fcdf5c6b0a09f106f977b58ffaadc5"
+  client = TwilioRestClient(ACCOUNT_SID, AUTH_TOKEN)
+  client.messages.create(
+      to="3013185581",
+      from_="12407529966",
+      body="Hello there",
+      media_url="https://media.licdn.com/mpr/mpr/shrinknp_200_200/p/2/000/188/1fc/011d373.jpg",
+    )
+  return "Success!"
 
-  form = SignupForm()
-
-  if request.method == "POST":
-    if form.validate() == False:
-      return render_template('signup.html', form=form)
-    else:
-      resp = twilio.twiml.Response()
-      resp.message("Hello, Mobile Monkey")
-      return str(resp)
-
-  return 'Success'
-
-
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-  if 'phonenumber' in session:
-    return redirect(url_for('home'))
-
-  form = LoginForm()
-
-  if request.method == "POST":
-    if form.validate() == False:
-      return render_template("login.html", form=form)
-    else:
-      phonenumber = form.phonenumber.data 
-      password = form.password.data 
-
-      user = User.query.filter_by(phonenumber=phonenumber).first()
-      if user is not None and user.check_password(password):
-        session['phonenumber'] = form.phonenumber.data 
-        return redirect(url_for('home'))
-      else:
-        return redirect(url_for('login'))
-
-  elif request.method == 'GET':
-    return render_template('login.html', form=form)
-
-@app.route("/logout")
-def logout():
-  session.pop('phonenumber', None)
-  return redirect(url_for('index'))
 
 if __name__ == "__main__":
   app.run(debug=True)
