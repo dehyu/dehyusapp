@@ -1,54 +1,20 @@
-
 from flask import Flask, render_template, request, session, redirect, url_for
 from models import db, User
 from forms import SignupForm
 from twilio.rest import TwilioRestClient
 from twilio import twiml
-
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/dehyusapp'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:deahware1@localhost/dehyusapp'
 db.init_app(app)
 
 app.secret_key = "development-key"
 
-# The session object makes use of a secret key.
-SECRET_KEY = 'a secret key'
-app = Flask(__name__)
-app.config.from_object(__name__)
-
-callers = {
-    "3013185581": "Curious George",
-    "14103018582": "Boots",
-    "+14158675311": "Virgil",
-}
-
-@app.route("/", methods=['GET', 'POST'])
-def hello():
+@app.route("/")
+def index():
   return render_template("index.html")
-
-@app.route("/sms", methods=['GET', 'POST'])
-def sms_response():
-  message_body = request.values.get('Body',None)
-  resp = twiml.Response()
-  if message_body == 'hello':
-    resp.message('Hello ' + message_body)    
-  elif message_body == 'no twili':
-    resp.message('Sorry to see you go. You can always re-enroll @ twili.io :)')
-
-
-
-  return str(resp)
-
-
-
-
-   
-
-    
-
-
 
 @app.route("/about")
 def about():
@@ -66,6 +32,21 @@ def signup():
       media_url="https://media.licdn.com/mpr/mpr/shrinknp_200_200/p/2/000/188/1fc/011d373.jpg",
     )
   return "Success!"
+
+@app.route("/sms", methods=['GET', 'POST'])
+def sms_response():
+  message_body = request.values.get('Body',None)
+  resp = twiml.Response()
+  if message_body == 'hello':
+    resp.message('Hello ' + message_body)    
+  elif message_body == 'no twili':
+    resp.message('Sorry to see you go. You can always re-enroll @ twili.io :)')
+  else:
+    resp.message('mmhmm ')
+
+  return str(resp)
+
+
 
 
 if __name__ == "__main__":

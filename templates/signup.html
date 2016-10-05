@@ -3,23 +3,12 @@
 {% block content %}
   <main class="container signup-section">
     <div class="section-content">
-      <h2>Create an account</h2>
+      <h2>Sign up with Twili</h2>
 
       <form method="POST" action="/signup">
         {{ form.hidden_tag() }}
-
-        <div class="form-group">
-          {{ form.first_name.label }}
-
-          {% if form.first_name.errors %}
-            {% for error in form.first_name.errors %}
-              <p class="error-message">{{ error }}</p>
-            {% endfor %}
-          {% endif %}
-
-          {{ form.first_name }}
-        </div>
-
+       
+        
         <div class="form-group">
           {{ form.phonenumber.label }}
 
@@ -31,7 +20,7 @@
 
           {{ form.phonenumber }}
         </div>
-
+        
         {{ form.submit(class="btn-primary") }}
       </form>
     </div>
