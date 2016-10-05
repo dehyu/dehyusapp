@@ -22,16 +22,24 @@ def about():
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
-  ACCOUNT_SID = "AC51aa42874175a8f9a1f7b95f3a3a5fe6"
-  AUTH_TOKEN = "b7fcdf5c6b0a09f106f977b58ffaadc5"
-  client = TwilioRestClient(ACCOUNT_SID, AUTH_TOKEN)
-  client.messages.create(
-      to="3013185581",
-      from_="12407529966",
-      body="Well Hello there Chelbi",
-      media_url="https://media.licdn.com/mpr/mpr/shrinknp_200_200/p/2/000/188/1fc/011d373.jpg",
-    )
-  return "Success!"
+  form = SignupForm()
+  if request.method == "POST":
+    if form.validate() == False:
+      return render_template('signup.html', form=form)
+    else:
+      newuser= User(form.phonenumber.data)
+      db.session.add(newuser)
+      db.session.commit()
+
+      session['phonenumber'] = newuser.phonenumber
+      return redirect(url_for('success'))
+
+  elif request.method == "GET":
+    return render_template('signup.html', form=form)
+
+@app.route("/success")
+def success():
+  return render_template("success.html")
 
 @app.route("/sms", methods=['GET', 'POST'])
 def sms_response():
